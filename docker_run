@@ -27,7 +27,7 @@ fi
 
 RESOURCE_DIR=""
 
-declare -a pass_through_args=()
+declare -a docker_container_args=()
 
 while [[ $# -gt 0 ]]; do
   arg="$1"
