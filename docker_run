@@ -3,26 +3,26 @@
 docker_image=${DOCKER_IMAGE:-"ghcr.io/trustedcomputinggroup/pandoc:latest"}
 
 print_usage() {
-	echo "Usage:"
-	echo "$(basename "${0}") [options] [build.sh arguments]"
-	echo
-	echo "Arguments:"
-	echo "  Arguments to this script are passed as parameters to build.sh inside of the docker conatiner"
-	echo
-	echo "Environment:"
-	echo
-	echo "DOCKER_IMAGE: set this env variable to the docker image to run, defaults to ${docker_image}"
-	echo
-	echo "Options:"
-	echo
-	echo "Miscellaneous"
-	echo "  --help: output this message"
+  echo "Usage:"
+  echo "$(basename "${0}") [options] [build.sh arguments]"
+  echo
+  echo "Arguments:"
+  echo "  Arguments to this script are passed as parameters to build.sh inside of the docker conatiner"
+  echo
+  echo "Environment:"
+  echo
+  echo "DOCKER_IMAGE: set this env variable to the docker image to run, defaults to ${docker_image}"
+  echo
+  echo "Options:"
+  echo
+  echo "Miscellaneous"
+  echo "  --help: output this message"
 }
 
 # hand process options as we want all options to go to docker run command except ones we know
 if test "${1}" == "--help"; then
-	print_usage
-	exit 0
+  print_usage
+  exit 0
 fi
 
 RESOURCE_DIR=""
@@ -32,22 +32,40 @@ declare -a docker_container_args=()
 while [[ $# -gt 0 ]]; do
   arg="$1"
   case "$arg" in
-    --resourcedir)
-      if [[ -n "$2" ]]; then
-        RESOURCE_DIR="$2"
-        shift 2
-      else
-        echo "Error: Argument for $1 is missing" >&2
-        exit 1
-      fi
-      ;;
+  --resourcedir)
+    if [[ -n "$2" ]]; then
+      RESOURCE_DIR="$2"
+      shift 2
+    else
+      echo "Error: Argument for $1 is missing" >&2
+      exit 1
+    fi
+    ;;
 
-    *)
-      docker_container_args+=("$arg")
-      shift
-      ;;
+  *)
+    docker_container_args+=("$arg")
+    shift
+    ;;
   esac
 done
+
+# determine execuable and folder modifiers from OS type
+if [[ $(uname -r) =~ WSL ]]; then
+  # WSL detected
+  dockerexe="wslc.exe"
+else
+  # Standalone Linux
+  dockerexe="docker"
+
+  # UNTESTED
+  # Test if selinux is enabled
+  if selinuxenabled; then
+    selinuxmod=":Z"
+  else
+    # Really make sure this string is empty
+    selinuxmod=""
+  fi
+fi
 
 declare -a docker_run_args=("--workdir=/workspace" "--volume=$(pwd):/workspace")
 
@@ -57,4 +75,4 @@ if [[ -n "${RESOURCE_DIR}" && -d "${RESOURCE_DIR}" ]]; then
 fi
 
 echo "Launching Container: ${docker_image}"
-docker run "${docker_run_args[@]}" "${docker_image}" "${docker_container_args[@]}"
+$dockerexe run "${docker_run_args[@]}" "${docker_image}" "${docker_container_args[@]}"
