@@ -73,8 +73,8 @@ if [[ -n "${RESOURCE_DIR}" && -d "${RESOURCE_DIR}" ]]; then
   docker_container_args+=("--resourcedir=/${RESOURCE_DIR}")
 fi
 
-echo "docker_run_args=${docker_run_args[@]}"
+# echo "docker_run_args=${docker_run_args[@]}"
 echo "Launching Container: ${docker_image}"
-echo "docker_container_args=${docker_container_args[@]}"
-echo
+# echo "docker_container_args=${docker_container_args[@]}"
+# echo
 $dockerexe run "${docker_run_args[@]}" "${docker_image}" "${docker_container_args[@]}"
