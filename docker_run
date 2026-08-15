@@ -58,7 +58,7 @@ else
   dockerexe="docker"
 
   # Test if selinux is enabled
-  if [[ -d /sys/fs/selinux  && -f /sys/fs/selinux/enforce ]]; then
+  if [[ -d /sys/fs/selinux && -f /sys/fs/selinux/enforce ]]; then
     selinuxmod=":Z"
   else
     # Really make sure this string is empty
@@ -70,11 +70,11 @@ declare -a docker_run_args=("--workdir=/workspace" "--volume=$(pwd):/workspace${
 
 if [[ -n "${RESOURCE_DIR}" && -d "${RESOURCE_DIR}" ]]; then
   docker_run_args+=("--volume=$(realpath ${RESOURCE_DIR}):/${RESOURCE_DIR}")
-  docker_container_args+=("--resourcedir=/${RESOURCE_DIR}")
+  docker_container_args+=("--resourcedir=/${RESOURCE_DIR}${selinuxmod}")
 fi
 
-echo "docker_run_args=${docker_run_args[@]}"
+# echo "docker_run_args=${docker_run_args[@]}"
 echo "Launching Container: ${docker_image}"
-echo "docker_container_args=${docker_container_args[@]}"
-echo
+# echo "docker_container_args=${docker_container_args[@]}"
+# echo
 $dockerexe run "${docker_run_args[@]}" "${docker_image}" "${docker_container_args[@]}"
